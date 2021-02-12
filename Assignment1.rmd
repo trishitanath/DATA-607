@@ -1,0 +1,64 @@
+---
+title: "Week 1 Assignment"
+author: "Trishita Nath"
+date: "2/12/2021"
+output: html_document
+---
+## Introduction
+I asked 1,058 respondents a SurveyMonkey poll the following questions about their Thanksgiving:
+
+DataSet: https://fivethirtyeight.com/features/heres-what-your-part-of-america-eats-on-thanksgiving/
+
+Github Link: https://github.com/fivethirtyeight/data/blob/master/thanksgiving-2015/thanksgiving-2015-poll-data.csv 
+
+```{r echo=TRUE, warning=FALSE}
+#loading required libraries
+library(tidyverse)
+library(curl)
+#data import from the source
+poll_dataframe <- read.csv('https://raw.githubusercontent.com/keshaws/CUNY_MSDS_2020/master/DATA607/Week1/data/thanksgiving-2015-poll-data.csv')
+
+dim(poll_dataframe)
+colnames(poll_dataframe)
+poll_dataframe_subset <- select(poll_dataframe, 'RespondentID', 'Do.you.celebrate.Thanksgiving.', 'What.is.your.gender.', 'Age', 'How.would.you.describe.where.you.live.', 'US.Region')
+head(poll_dataframe_subset,10)
+poll_dataframe_data <- rename(poll_dataframe_subset,ID='RespondentID',celebrate='Do.you.celebrate.Thanksgiving.', gender = 'What.is.your.gender.', age_range='Age', living_region = 'How.would.you.describe.where.you.live.', us_region='US.Region')
+head(poll_dataframe_data,5)
+unique(poll_dataframe_data$living_region)
+
+poll_dataframe_data %>%
+ group_by(living_region) %>%
+ summarize(count=n())
+
+poll_dataframe_data %>%
+ group_by(us_region) %>%
+ summarize(count=n())
+
+poll_data_cleaned <- poll_dataframe_data %>%
+      filter((poll_dataframe_data$us_region!=""))
+
+poll_data_cleaned %>%
+ group_by(us_region) %>%
+ summarize(count=n())
+
+poll_data_cleaned <- poll_dataframe_data %>%
+      filter((poll_dataframe_data$us_region!=""))
+
+poll_data_cleaned %>%
+ group_by(us_region, celebrate) %>%
+ summarize(count=n())
+
+ggplot(poll_dataframe_data, mapping = aes(poll_dataframe_data$living_region))+
+    geom_bar(aes(fill=poll_dataframe_data$age_range))+
+    xlab('Living Region')+labs(fill='gender')+geom_text(stat='count',aes(label = ..count..,y=..count..),vjust=-0.2)+
+    ggtitle('Poll data')
+
+ggplot(poll_data_cleaned, mapping = aes(poll_data_cleaned$us_region))+
+    geom_bar(aes(fill=poll_data_cleaned$celebrate))+
+    xlab('US Region')+labs(fill='age_range')+geom_text(stat='count',aes(label = ..count..,y=..count..),vjust=-0.2)+
+    theme(axis.text.x = element_text(angle = 90))+
+    ggtitle('Poll data')
+```
+
+## Conclusion
+The main data set has 1058 data points and 65 features. I have created a subset and cleaned it for the US Region. From the data visualization it 68 said yes and 931 said no. From the plot, thanksgiving celebration is popular in suburban living region. In addition, thanksgiving celebration is least popular in “mountain” region and most popular in “south atlantic” region
