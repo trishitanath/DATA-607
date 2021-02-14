@@ -1,0 +1,63 @@
+---
+title: "Assignment2"
+author: "Trishita Nath"
+date: "2/14/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## OVERVIEW {.tabset}
+I collected data, stored it in a relational (SQL) database, and then imported it into an R dataframe for analysis.
+
+I polled six friends regarding five movies that were released in 2020. They gave me their ratings of the movies which I recorded in CSV files.
+
+The link to these csv files is: https://github.com/trishitanath/DATA-607/tree/main/Assignment2
+
+
+## CONNECT TO MYSQL {.tabset}
+Import data from SQL for analysis. \hfill\break
+*Missing data was handled during SQL load.* \hfill\break
+
+```{r}
+library(RCurl);
+library(DBI);
+library(RMySQL);
+library(ggplot2);
+
+movies_db <- dbConnect(MySQL(), user='root', password='@Dabdabs5034', dbname='assignment2', host='localhost')
+```
+
+## STORING DATA IN A RELATIONAL DATABASE {.tabset}
+My SQL code to create and populate tables is found at this link: https://github.com/trishitanath/DATA-607/blob/main/Assignment2/create_tables.sql \hfill\break
+
+Reading data from the SQL database. \hfill\break
+\hfill\break
+*Note: this step took a good amount of time / effort due to a bug in the 8.0.21 version of MySQL for Windows10. To get around this issue, I uninstalled the 8.0.21 version and installed the 8.0.20 version of MySQL and altered the password encryption to allow a connection between MySQL and RStudio.* \hfill\break
+
+```{r}
+dbListTables(movies_db);
+new_movie <- dbReadTable(movies_db, "movies")
+new_rater <- dbReadTable(movies_db, "raters")
+new_rating <- dbReadTable(movies_db, "ratings")
+new_movie
+new_rater
+new_rating
+```
+
+## Graphical View of Rating Data {.tabset}
+
+Average rating plot per movie ID. Average rating is the sum of (non-null) ratings per movieID  divided by the number of the number of non-null ratings. \hfill\break
+
+```{r} 
+movie <- 1:5
+avg_rating <- c(23/6, 27/6, 25/6, 13/4, 12/3)
+avg <- as.table(setNames(avg_rating, movie))
+barplot(avg, main="Avg Movie Rating (by MovieID)", horiz=TRUE,
+  names.arg=c("1", "2", "3", "4", "5"))
+```
+
+## CONCLUSION {.tabset}
+
+From the plot movies have an average rating of 3 or higher with "Old Guard" having the lowest average movie rating and "Fast & Furious 9" having the highest average movie rating. Hence I would most recommend Old Guard due to its high rating'. \hfill\break \hfill\break
